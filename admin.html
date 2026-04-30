@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏后台管理（添加+删除+Logo上传）</title>
+    <style>
+        body{max-width:700px;margin:30px auto;padding:20px;background:#f8f9fa;font-family:微软雅黑;}
+        .box{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 10px #00000015;margin-bottom:20px;}
+        h2{text-align:center;margin-bottom:20px;color:#2c3e50;}
+        .item{margin-bottom:15px;}
+        label{display:block;margin-bottom:5px;font-weight:bold;color:#333;}
+        select,input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;}
+        button{width:100%;padding:12px;background:#409eff;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;}
+        button:hover{background:#337ecc;}
+        .game-item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid #eee;}
+        .del-btn{background:#ff4d4f;color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;}
+        .logo-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;margin:10px auto;display:block;border:2px solid #eee;}
+    </style>
+</head>
+<body>
+<!-- 网站Logo上传区域 -->
+<div class="box">
+    <h2>更换网站顶部Logo</h2>
+    <div class="item">
+        < img id="logoPreview" class="logo-preview" src="" alt="Logo预览">
+        <input type="file" id="logoUpload" accept="image/*">
+        <p style="font-size:12px;color:#999;margin-top:5px;">建议上传正方形图片，会自动生成logo.png文件</p >
+    </div>
+    <button onclick="saveLogo()">保存Logo</button>
+</div>
+
+<!-- 添加游戏区域 -->
+<div class="box">
+    <h2>添加新游戏</h2>
+    <div class="item">
+        <label>选择分类</label>
+        <select id="cate">
+            <option>古风仙侠</option>
+            <option>复古传奇</option>
+            <option>策略卡牌</option>
+            <option>休闲小游戏</option>
+        </select>
+    </div>
+    <div class="item">
+        <label>游戏图标/LOGO(上传图片选择)</label>
+        <input type="file" id="img" accept="image/*">
+    </div>
+    <div class="item">
+        <label>游戏名称</label>
+        <input type="text" id="name" placeholder="输入游戏名字">
+    </div>
+    <div class="item">
+        <label>游戏简介</label>
+        <textarea id="desc" rows="3" placeholder="输入游戏简单介绍"></textarea>
+    </div>
+    <div class="item">
+        <label>下载链接</label>
+        <input type="text" id="url" placeholder="粘贴游戏下载链接">
+    </div>
+    <button onclick="addGame()">一键添加游戏</button>
+</div>
+
+<!-- 游戏列表（带删除） -->
+<div class="box">
+    <h2>已有游戏列表（点击即可下架删除）</h2>
+    <div id="gameList"></div>
+</div>
+
+<script>
+    let imgSrc = "";
+    let gameData = {
+        "古风仙侠":[],"复古传奇":[],"策略卡牌":[],"休闲小游戏":[]
+    };
+    let logoFile = null;
+
+    // 加载现有游戏数据
+    async function loadData() {
+        try {
+            let res = await fetch("data.json");
+            gameData = await res.json();
+            renderList();
+        } catch (e) {}
+    }
+
+    // 渲染游戏列表
+    function renderList() {
+        let html = "";
+        for (let cate in gameData) {
+            if(gameData[cate].length > 0){
+                html += `<h4 style="margin:12px 0 6px;color:#409eff;">${cate}</h4>`;
+            }
+            gameData[cate].forEach((item, i) => {
+                html += `
+                <div class="game-item">
+                    <span>${item.name}</span>
+                    <button class="del-btn" onclick="deleteGame('${cate}', ${i})">一键下架删除</button>
+                </div>
+                `;
+            });
+        }
+        document.getElementById("gameList").innerHTML = html || "<p style='text-align:center;color:#999;'>暂时还没有添加任何游戏</p >";
+    }
+
+    // 网站Logo上传预览
+    document.getElementById("logoUpload").addEventListener("change", function(e) {
+        logoFile = e.target.files[0];
+        if (logoFile) {
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById("logoPreview").src = event.target.result;
+            }
+            reader.readAsDataURL(logoFile);
+        }
+    });
+
+    // 保存网站Logo
+    function saveLogo() {
+        if (!logoFile) {
+            alert("请先选择一张图片");
+            return;
+        }
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(logoFile);
+        link.download = 'logo.png';
+        link.click();
+        alert("Logo已生成！请把下载好的logo.png拖进你的游戏文件夹，替换原文件即可生效");
+    }
+
+    // 游戏图标上传
+    document.getElementById("img").addEventListener("change",function(e){
+        let file = e.target.files[0];
+        let reader = new FileReader();
+        reader.onload = function(event){
+            imgSrc = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    });
+
+    // 添加游戏
+    async function addGame(){
+        let cate = document.getElementById("cate").value;
+        let name = document.getElementById("name").value;
+        let desc = document.getElementById("desc").value;
+        let url = document.getElementById("url").value;
+        if(!imgSrc||!name||!desc||!url){
+            alert("请全部填写完整并上传游戏图标");return;
+        }
+        gameData[cate].push({img:imgSrc,name:name,desc:desc,url:url});
+        saveData();
+    }
+
+    // 删除游戏
+    function deleteGame(cate, index) {
+        if(confirm("确定要把这个游戏下架删除吗？")){
+            gameData[cate].splice(index, 1);
+            saveData();
+        }
+    }
+
+    // 保存游戏数据并下载
+    function saveData() {
+        let jsonStr = JSON.stringify(gameData,null,2);
+        let blob = new Blob([jsonStr],{type:"application/json"});
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "data.json";
+        a.click();
+        alert("操作成功！把下载好的data.json拖进文件夹覆盖原来的即可");
+        renderList();
+    }
+
+    // 页面加载时执行
+    loadData();
+</script>
+</body>
+</html>

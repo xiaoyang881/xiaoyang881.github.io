@@ -3,175 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏后台管理（添加+删除+Logo上传）</title>
+    <title>游戏后台管理</title>
     <style>
-        body{max-width:700px;margin:30px auto;padding:20px;background:#f8f9fa;font-family:微软雅黑;}
-        .box{background:#fff;padding:25px;border-radius:12px;box-shadow:0 2px 10px #00000015;margin-bottom:20px;}
-        h2{text-align:center;margin-bottom:20px;color:#2c3e50;}
-        .item{margin-bottom:15px;}
-        label{display:block;margin-bottom:5px;font-weight:bold;color:#333;}
-        select,input,textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;}
-        button{width:100%;padding:12px;background:#409eff;color:#fff;border:none;border-radius:6px;font-size:16px;cursor:pointer;}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif;}
+        #loginBox{position:fixed;top:0;left:0;width:100%;height:100%;background:#f5f7fa;display:flex;align-items:center;justify-content:center;z-index:9999;}
+        #loginBox .login-card{background:#fff;padding:40px;border-radius:12px;box-shadow:0 2px 20px rgba(0,0,0,0.15);text-align:center;width:360px;}
+        #loginBox h2{color:#409eff;margin-bottom:10px;}
+        #loginBox p{color:#999;font-size:13px;margin-bottom:20px;}
+        #loginBox input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;outline:none;font-size:16px;text-align:center;margin-bottom:15px;}
+        #loginBox input:focus{border-color:#409eff;}
+        #loginBox button{width:100%;padding:12px;background:#409eff;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
+        #loginBox button:hover{background:#337ecc;}
+        #loginBox .error{color:#f56c6c;font-size:13px;margin-top:10px;display:none;}
+        #mainBox{display:none;}
+        body{background:#f5f7fa;padding:20px;}
+        .box{max-width:900px;margin:0 auto;background:#fff;padding:30px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        h2{text-align:center;color:#409eff;margin-bottom:30px;}
+        .part{border-bottom:1px solid #eee;padding-bottom:25px;margin-bottom:25px;}
+        .form-item{margin-bottom:15px;}
+        .form-item label{display:block;margin-bottom:5px;color:#333;font-weight:bold;}
+        .form-item input,.form-item textarea,.form-item select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;outline:none;font-size:14px;}
+        button{padding:10px 18px;background:#409eff;color:#fff;border:none;border-radius:8px;cursor:pointer;margin:3px;}
         button:hover{background:#337ecc;}
-        .game-item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid #eee;}
-        .del-btn{background:#ff4d4f;color:#fff;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;}
-        .logo-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;margin:10px auto;display:block;border:2px solid #eee;}
+        .del-btn{background:#f56c6c;}
+        .del-btn:hover{background:#dd6161;}
+        .game-item{padding:12px;border:1px solid #eee;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+        .cate-tag{display:inline-block;padding:6px 12px;background:#e8f4ff;border-radius:6px;margin:5px;}
+        .logout-btn{float:right;background:#f56c6c;font-size:12px;padding:6px 12px;}
+        .logout-btn:hover{background:#dd6161;}
     </style>
 </head>
 <body>
-<!-- 网站Logo上传区域 -->
-<div class="box">
-    <h2>更换网站顶部Logo</h2>
-    <div class="item">
-        < img id="logoPreview" class="logo-preview" src="" alt="Logo预览">
-        <input type="file" id="logoUpload" accept="image/*">
-        <p style="font-size:12px;color:#999;margin-top:5px;">建议上传正方形图片，会自动生成logo.png文件</p >
+
+<div id="loginBox">
+    <div class="login-card">
+        <h2>🔒 后台管理登录</h2>
+        <p>请输入管理密码</p >
+        <input type="password" id="pwdInput" placeholder="请输入密码" onkeydown="if(event.key==='Enter')checkPwd()">
+        <button onclick="checkPwd()">进入后台</button>
+        <div class="error" id="loginError">密码错误，请重试</div>
     </div>
-    <button onclick="saveLogo()">保存Logo</button>
 </div>
 
-<!-- 添加游戏区域 -->
-<div class="box">
-    <h2>添加新游戏</h2>
-    <div class="item">
-        <label>选择分类</label>
-        <select id="cate">
-            <option>古风仙侠</option>
-            <option>复古传奇</option>
-            <option>策略卡牌</option>
-            <option>休闲小游戏</option>
-        </select>
-    </div>
-    <div class="item">
-        <label>游戏图标/LOGO(上传图片选择)</label>
-        <input type="file" id="img" accept="image/*">
-    </div>
-    <div class="item">
-        <label>游戏名称</label>
-        <input type="text" id="name" placeholder="输入游戏名字">
-    </div>
-    <div class="item">
-        <label>游戏简介</label>
-        <textarea id="desc" rows="3" placeholder="输入游戏简单介绍"></textarea>
-    </div>
-    <div class="item">
-        <label>下载链接</label>
-        <input type="text" id="url" placeholder="粘贴游戏下载链接">
-    </div>
-    <button onclick="addGame()">一键添加游戏</button>
-</div>
+<div id="mainBox">
+    <div class="box">
+        <button class="logout-btn" onclick="logout()">退出登录</button>
+        <h2>🎮 游戏一站式管理后台</h2>
 
-<!-- 游戏列表（带删除） -->
-<div class="box">
-    <h2>已有游戏列表（点击即可下架删除）</h2>
-    <div id="gameList"></div>
+        <!-- 预设分类管理 -->
+        <div class="part">
+            <h3 style="margin-bottom:15px;color:#2c3e50;">一、预设分类管理</h3>
+            <div class="form-item">
+                <input type="text" id="newCate" placeholder="输入分类名称，如：传奇、仙侠、卡牌">
+            </div>
+            <button onclick="addCate()">添加分类</button>
+            <div id="cateBox" style="margin-top:15px;"></div>
+        </div>
+
+        <!-- 添加游戏 -->
+        <div class="part">
+            <h3 style="margin-bottom:15px;color:#2c3e50;">二、添加游戏</h3>
+            <div class="form-item">
+                <label>选择分类</label>
+                <select id="cateSelect"><option value="">请先添加分类</option></select>
+            </div>
+            <div class="form-item">
+                <label>游戏名称</label>
+                <input type="text" id="name" placeholder="输入游戏名字">
+            </div>
+            <div class="form-item">
+                <label>游戏简介</label>
+                <textarea id="desc" rows="2" placeholder="简单介绍游戏"></textarea>
+            </div>
+            <div class="form-item">
+                <label>游戏图标链接</label>
+                <input type="text" id="img" placeholder="粘贴图标网络链接">
+            </div>
+            <div class="form-item">
+                <label>下载链接</label>
+                <input type="text" id="url" placeholder="粘贴下载地址">
+            </div>
+            <button onclick="addGame()">添加游戏</button>
+            <button onclick="refreshAdmin()">刷新全部</button>
+        </div>
+
+        <!-- 已有游戏 -->
+        <div>
+            <h3 style="margin-bottom:15px;color:#2c3e50;">三、已有游戏（可删除）</h3>
+            <div id="listBox"></div>
+        </div>
+
+        <!-- 数据备份 -->
+        <div class="part" style="margin-top:20px;">
+            <h3 style="margin-bottom:15px;color:#2c3e50;">四、数据备份与恢复</h3>
+            <button onclick="exportData()">导出数据</button>
+            <button onclick="document.getElementById('importFile').click()">导入数据</button>
+            <input type="file" id="importFile" accept=".json" style="display:none;" onchange="importData(this)">
+            <button onclick="resetData()" class="del-btn">清空数据</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    let imgSrc = "";
-    let gameData = {
-        "古风仙侠":[],"复古传奇":[],"策略卡牌":[],"休闲小游戏":[]
-    };
-    let logoFile = null;
+const ADMIN_PASSWORD = "123456";
+const STORAGE_KEY = 'game_collection_data';
 
-    // 加载现有游戏数据
-    async function loadData() {
-        try {
-            let res = await fetch("data.json");
-            gameData = await res.json();
-            renderList();
-        } catch (e) {}
+function checkPwd(){
+    let input=document.getElementById('pwdInput').value;
+    if(input===ADMIN_PASSWORD){
+        document.getElementById('loginBox').style.display='none';
+        document.getElementById('mainBox').style.display='block';
+        document.getElementById('pwdInput').value='';
+        refreshAdmin();
+    }else{
+        document.getElementById('loginError').style.display='block';
+        document.getElementById('pwdInput').value='';
     }
+}
+function logout(){
+    document.getElementById('mainBox').style.display='none';
+    document.getElementById('loginBox').style.display='flex';
+    document.getElementById('loginError').style.display='none';
+}
 
-    // 渲染游戏列表
-    function renderList() {
-        let html = "";
-        for (let cate in gameData) {
-            if(gameData[cate].length > 0){
-                html += `<h4 style="margin:12px 0 6px;color:#409eff;">${cate}</h4>`;
-            }
-            gameData[cate].forEach((item, i) => {
-                html += `
-                <div class="game-item">
-                    <span>${item.name}</span>
-                    <button class="del-btn" onclick="deleteGame('${cate}', ${i})">一键下架删除</button>
-                </div>
-                `;
+function getData(){
+    let raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return{cateList:[],game:{}};
+    try{return JSON.parse(raw);}catch(e){return{cateList:[],game:{}};}
+}
+function saveData(data){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+
+function refreshAdmin(){
+    let data=getData();
+    let sel=document.getElementById('cateSelect');
+    sel.innerHTML='<option value="">请先选择分类</option>';
+    if(data.cateList&&data.cateList.length>0){
+        data.cateList.forEach(c=>sel.innerHTML+=`<option value="${c}">${c}</option>`);
+    }
+    let cb=document.getElementById('cateBox');
+    let ch='';
+    if(data.cateList&&data.cateList.length>0){
+        data.cateList.forEach(c=>ch+=`<span class="cate-tag">${c} <button class="del-btn" style="padding:2px 6px;font-size:12px" onclick="delCate('${c}')">删除</button></span>`);
+    }else{ch='<span style="color:#999;">暂无预设分类</span>';}
+    cb.innerHTML=ch;
+    let lb=document.getElementById('listBox');
+    let lh='';
+    let games=data.game||{};
+    let cats=Object.keys(games);
+    if(cats.length===0){lh='<div style="color:#999;text-align:center;padding:20px;">暂无游戏</div>';}
+    else{
+        for(let c of cats){
+            lh+=`<h4 style="margin:15px 0 8px;color:#409eff;">${c}</h4>`;
+            games[c].forEach((item,i)=>{
+                lh+=`<div class="game-item"><div><strong>${item.name}</strong></div><button class="del-btn" onclick="delGame('${c}',${i})">删除</button></div>`;
             });
         }
-        document.getElementById("gameList").innerHTML = html || "<p style='text-align:center;color:#999;'>暂时还没有添加任何游戏</p >";
     }
+    lb.innerHTML=lh;
+}
 
-    // 网站Logo上传预览
-    document.getElementById("logoUpload").addEventListener("change", function(e) {
-        logoFile = e.target.files[0];
-        if (logoFile) {
-            let reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById("logoPreview").src = event.target.result;
-            }
-            reader.readAsDataURL(logoFile);
-        }
-    });
-
-    // 保存网站Logo
-    function saveLogo() {
-        if (!logoFile) {
-            alert("请先选择一张图片");
-            return;
-        }
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(logoFile);
-        link.download = 'logo.png';
-        link.click();
-        alert("Logo已生成！请把下载好的logo.png拖进你的游戏文件夹，替换原文件即可生效");
-    }
-
-    // 游戏图标上传
-    document.getElementById("img").addEventListener("change",function(e){
-        let file = e.target.files[0];
-        let reader = new FileReader();
-        reader.onload = function(event){
-            imgSrc = event.target.result;
-        }
-        reader.readAsDataURL(file);
-    });
-
-    // 添加游戏
-    async function addGame(){
-        let cate = document.getElementById("cate").value;
-        let name = document.getElementById("name").value;
-        let desc = document.getElementById("desc").value;
-        let url = document.getElementById("url").value;
-        if(!imgSrc||!name||!desc||!url){
-            alert("请全部填写完整并上传游戏图标");return;
-        }
-        gameData[cate].push({img:imgSrc,name:name,desc:desc,url:url});
-        saveData();
-    }
-
-    // 删除游戏
-    function deleteGame(cate, index) {
-        if(confirm("确定要把这个游戏下架删除吗？")){
-            gameData[cate].splice(index, 1);
-            saveData();
-        }
-    }
-
-    // 保存游戏数据并下载
-    function saveData() {
-        let jsonStr = JSON.stringify(gameData,null,2);
-        let blob = new Blob([jsonStr],{type:"application/json"});
-        let a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "data.json";
-        a.click();
-        alert("操作成功！把下载好的data.json拖进文件夹覆盖原来的即可");
-        renderList();
-    }
-
-    // 页面加载时执行
-    loadData();
+function addCate(){
+    let c=document.getElementById('newCate').value.trim();
+    if(!c){alert('请输入分类名');return;}
+    let data=getData();
+    if(!data.cateList)data.cateList=[];
+    if(data.cateList.includes(c)){alert('已存在');return;}
+    data.cateList.push(c);saveData(data);
+    document.getElementById('newCate').value='';refreshAdmin();
+}
+function delCate(cate){
+    if(!confirm('确定删除【'+cate+'】及该分类下所有游戏？'))return;
+    let data=getData();
+    data.cateList=data.cateList.filter(c=>c!==cate);
+    if(data.game&&data.game[cate])delete data.game[cate];
+    saveData(data);refreshAdmin();
+}
+function addGame(){
+    let cate=document.getElementById('cateSelect').value;
+    let name=document.getElementById('name').value.trim();
+    let desc=document.getElementById('desc').value.trim();
+    let img=document.getElementById('img').value.trim();
+    let url=document.getElementById('url').value.trim();
+    if(!cate||!name||!img||!url){alert('分类、游戏名、图标链接、下载链接 不能为空');return;}
+    let data=getData();
+    if(!data.game)data.game={};
+    if(!data.game[cate])data.game[cate]=[];
+    data.game[cate].push({name,desc,img,url});
+    saveData(data);alert('添加成功');
+    document.getElementById('name').value='';document.getElementById('desc').value='';
+    document.getElementById('img').value='';document.getElementById('url').value='';refreshAdmin();
+}
+function delGame(cate,index){
+    if(!confirm('确定删除这个游戏吗？'))return;
+    let data=getData();
+    data.game[cate].splice(index,1);
+    if(data.game[cate].length===0)delete data.game[cate];
+    saveData(data);refreshAdmin();
+}
+function exportData(){
+    let data=getData();
+    let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    let a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='游戏数据备份_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+function importData(input){
+    let file=input.files[0];if(!file)return;
+    let reader=new FileReader();
+    reader.onload=function(e){
+        try{
+            let data=JSON.parse(e.target.result);
+            if(typeof data.game==='object'){saveData(data);alert('导入成功');refreshAdmin();}
+            else{alert('格式错误');}
+        }catch(err){alert('解析失败');}
+    };
+    reader.readAsText(file);
+}
+function resetData(){
+    if(confirm('确定清空所有数据？此操作不可恢复！')){localStorage.removeItem(STORAGE_KEY);alert('已清空');refreshAdmin();}
+}
 </script>
 </body>
 </html>

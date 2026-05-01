@@ -46,12 +46,26 @@
 <div class="footer">本页面持续更新新品游戏 · 链接长期有效</div>
 
 <script>
-const STORAGE_KEY = 'game_collection_data';
+// 你的游戏数据已写在这里
+var DATA = {
+  "logo": "https://s41.ax1x.com/2026/05/01/peTiemj.jpg",
+  "cateList": [
+    "复古传奇"
+  ],
+  "game": {
+    "复古传奇": [
+      {
+        "name": "骷髅传奇",
+        "desc": "开局一只小骷髅东西全靠打！",
+        "img": "https://s41.ax1x.com/2026/05/01/peTiemj.jpg",
+        "url": "https://hw.longxiangpintai6.com/mobile/Downfile/index?gid=225&pid=16522"
+      }
+    ]
+  }
+};
 
 function getData() {
-    let raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { game: {} };
-    try { return JSON.parse(raw); } catch (e) { return { game: {} }; }
+    return DATA;
 }
 
 function renderFront() {
